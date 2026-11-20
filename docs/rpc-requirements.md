@@ -12,7 +12,7 @@ The bot is a read-only event listener and does not submit transactions. It inter
 | :--- | :--- | :--- |
 | `getHealth` | Validates endpoint health, chain tip, and retention boundaries | Called during startup health checks, periodically at each polling cycle, and before event queries (`src/stellar/client.ts`, `src/stellar/events.ts`, `src/poller.ts`) |
 | `getEvents` | Reads contract event logs using pagination filters | Sequentially queried by cursor or start ledger in `paginatedGetEvents` (`src/stellar/events.ts`) |
-| `getNetwork` | Validates network identity and passphrase alignment | Invoked at startup via `validateNetworkPassphrase` (`src/stellar/client.ts`, `src/index.ts`) to prevent running against the wrong network |
+| `getNetwork` | Validates network identity and passphrase alignment | Invoked before admitting an RPC provider via `assertNetworkIdentity` (`src/stellar/rpc-guard.ts`), `validateNetworkPassphrase`, and `admitRpcProvider` (`src/stellar/client.ts`, `src/index.ts`) to prevent running against the wrong network |
 
 ### Method Payloads & Expectations
 
@@ -44,7 +44,7 @@ Used at boot to verify the network passphrase (e.g. `Test SDF Network ; Septembe
   "protocolVersion": 22
 }
 ```
-If the passphrase does not match configuration, the bot refuses to boot with `NetworkPassphraseMismatchError`.
+If the reported passphrase does not match `STELLAR_NETWORK_PASSPHRASE`, `assertNetworkIdentity` (`src/stellar/rpc-guard.ts`) and `admitRpcProvider` / `validateNetworkPassphrase` (`src/stellar/client.ts`) reject the provider with `NetworkPassphraseMismatchError` even if `getHealth` reports `"healthy"`. Error messages are bounded and never echo the raw passphrases.
 
 ---
 
