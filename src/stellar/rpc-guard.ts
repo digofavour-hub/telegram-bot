@@ -9,6 +9,8 @@
 import type { rpc } from "@stellar/stellar-sdk";
 import { normalizeRpcEndpoint } from "./client.js";
 
+import { resolveMaxBackoffMs } from "./client.js";
+
 /** Default ceiling on the number of events permitted in a single RPC response. */
 export const DEFAULT_MAX_EVENTS_PER_RESPONSE = 1_000;
 
@@ -90,6 +92,7 @@ export function assertRpcEndpointUrl(
 }
 
 export type RpcGuardProblem =
+  | "response-oversized"
   | "not-an-object"
   | "events-not-an-array"
   | "events-oversized"
